@@ -1,0 +1,58 @@
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #ffffff;
+}
+
+/* --- Menu de Navegação --- */
+.nav-container {
+  display: flex;
+  border-bottom: 2px solid #dee2e6;
+  padding: 10px 10px 0 10px;
+  background-color: #f8f9fa;
+}
+
+.nav-link {
+  padding: 10px 20px;
+  margin-right: 5px;
+  text-decoration: none;
+  color: #333;
+  background-color: #e9ecef;
+  border: 1px solid #dee2e6;
+  border-bottom: none;
+  border-radius: 5px 5px 0 0;
+  font-weight: bold;
+  display: inline-block;
+}
+
+/* --- Container Geral da Página --- */
+.page-container {
+  padding: 20px;
+}
+
+.page-title {
+  text-align: center;
+}
+
+/* --- Componentes Específicos --- */
+.session-card {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px auto;
+  width: 300px;
+  text-align: center;
+  background-color: #f8f9fa;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.card-title {
+  margin: 0 0 10px 0;
+  color: #333;
+}
+
+.card-value {
+  margin: 0;
+  color: #007bff;
+}

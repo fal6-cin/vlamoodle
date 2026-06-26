@@ -56,3 +56,53 @@ body {
   margin: 0;
   color: #007bff;
 }
+
+/* --- Cards de Alunos --- */
+.students-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.student-card {
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 15px;
+  background-color: #fff;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.student-avatar {
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+
+.student-name {
+  margin: 0 0 10px 0;
+  font-size: 1.2rem;
+  color: #343a40;
+}
+
+.student-card p {
+  margin: 5px 0;
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+.student-card p strong {
+  color: #495057;
+}
+
+/* Responsividade para os cards */
+@media (max-width: 1200px) {
+  .students-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .students-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -51,7 +51,7 @@ def update_card(value):
     # Lógica de sessionization
     dff = dff.sort_values(by=['userid', 'timecreated'])
     dff['time_diff'] = dff.groupby('userid')['timecreated'].diff()
-    dff['is_new_session'] = (dff['time_diff'] > 1800) | dff['time_diff'].isna()
+    dff['is_new_session'] = (dff['time_diff'] > 3600) | dff['time_diff'].isna()
     
     total_sessoes = dff['is_new_session'].sum()
     
@@ -116,7 +116,7 @@ def update_table(value):
     # Ordenar por userid e tempo para o cálculo de diferença
     df_30_dias = df_30_dias.sort_values(by=['userid', 'timecreated'])
     df_30_dias['time_diff'] = df_30_dias.groupby('userid')['timecreated'].diff()
-    df_30_dias['is_new_session'] = (df_30_dias['time_diff'] > 1800) | df_30_dias['time_diff'].isna()
+    df_30_dias['is_new_session'] = (df_30_dias['time_diff'] > 3600) | df_30_dias['time_diff'].isna()
     
     # Contar as sessões por usuário
     acessos_30_dias = df_30_dias.groupby('userid')['is_new_session'].sum().reset_index(name='acessos_30_dias')
@@ -192,7 +192,7 @@ def update_table(value):
             
         valor_style = {'color': 'red'}
         
-        card = html.Div(className='student-card', children=[
+        card_content = html.Div(className='student-card', children=[
             html.Div("👤", className='student-avatar'),
             html.H4(nome_exibicao, className='student-name'),
             html.P([html.Strong("Último Acesso: "), html.Span(ultimo_acesso_fmt, style=valor_style)]),
@@ -202,6 +202,13 @@ def update_table(value):
             html.P([html.Strong("Atividades Atrasadas: "), html.Span(str(row.get('qtd_atividades_atrasadas', 0)), style=valor_style)]),
             html.P([html.Strong("Atividades Realizadas: "), html.Span(str(row.get('qtd_atividades_realizadas', 0)), style=valor_style)])
         ])
+        
+        card = dcc.Link(
+            href=f"/aluno/{row['userid']}",
+            style={'textDecoration': 'none', 'color': 'inherit', 'display': 'block'},
+            children=[card_content]
+        )
+        
         cards.append(card)
     
     return data, columns, cards

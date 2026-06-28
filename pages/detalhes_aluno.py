@@ -211,11 +211,15 @@ def atualizar_conteudo_aluno(user_id_int):
         
         s_postagens = len(user_forum[user_forum['tipo_interacao'].astype(str).str.lower().isin(['postagem', 'post'])]) if not user_forum.empty and 'tipo_interacao' in user_forum.columns else 0
         s_respostas = len(user_forum[user_forum['tipo_interacao'].astype(str).str.lower().isin(['resposta', 'reply'])]) if not user_forum.empty and 'tipo_interacao' in user_forum.columns else 0
-        s_leituras = len(user_forum[user_forum['tipo_interacao'].astype(str).str.lower().isin(['leitura', 'view'])]) if not user_forum.empty and 'tipo_interacao' in user_forum.columns else 0
+        
+        # Leitura no fórum a partir do df_logstore
+        s_leituras = len(user_logs_raw[(user_logs_raw['component'] == 'mod_forum') & (user_logs_raw['action'] == 'viewed')])
         
         m_postagens = int(class_forum[class_forum['tipo_interacao'].astype(str).str.lower().isin(['postagem', 'post'])].groupby('userid').size().mean()) if not class_forum.empty and 'tipo_interacao' in class_forum.columns and not class_forum[class_forum['tipo_interacao'].astype(str).str.lower().isin(['postagem', 'post'])].empty else 0
         m_respostas = int(class_forum[class_forum['tipo_interacao'].astype(str).str.lower().isin(['resposta', 'reply'])].groupby('userid').size().mean()) if not class_forum.empty and 'tipo_interacao' in class_forum.columns and not class_forum[class_forum['tipo_interacao'].astype(str).str.lower().isin(['resposta', 'reply'])].empty else 0
-        m_leituras = int(class_forum[class_forum['tipo_interacao'].astype(str).str.lower().isin(['leitura', 'view'])].groupby('userid').size().mean()) if not class_forum.empty and 'tipo_interacao' in class_forum.columns and not class_forum[class_forum['tipo_interacao'].astype(str).str.lower().isin(['leitura', 'view'])].empty else 0
+        
+        m_leituras_df = class_logs_raw[(class_logs_raw['component'] == 'mod_forum') & (class_logs_raw['action'] == 'viewed')]
+        m_leituras = int(m_leituras_df.groupby('userid').size().mean()) if not m_leituras_df.empty else 0
     except Exception:
         s_postagens = s_respostas = s_leituras = 0
         m_postagens = m_respostas = m_leituras = 0
@@ -279,7 +283,7 @@ def atualizar_conteudo_aluno(user_id_int):
         pivot_sessoes = heatmap_df.pivot(index='weekday', columns='week', values='Sessões')
         pivot_hover = heatmap_df.pivot(index='weekday', columns='week', values='hover_text')
         
-        fig_acessos = px.imshow(pivot_sessoes, title='Evolução de Sessões (Mapa de Calor)', color_continuous_scale=['#ebedf0', '#9be9a8', '#40c463', '#30a14e', '#216e39'])
+        fig_acessos = px.imshow(pivot_sessoes, title='Evolução de Sessões (Mapa de Calor)', color_continuous_scale=[[0,'#ccc'],[0.01,'#cff1a2'],[1,'#074050']])
         fig_acessos.update_traces(customdata=pivot_hover, hovertemplate='%{customdata}<extra></extra>', xgap=3, ygap=3)
         fig_acessos.update_layout(
             yaxis=dict(tickmode='array', tickvals=[0, 1, 2, 3, 4, 5, 6], ticktext=['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'], showgrid=False, zeroline=False, title=None),
@@ -288,6 +292,25 @@ def atualizar_conteudo_aluno(user_id_int):
         )
     else:
         fig_acessos = px.line(title='Sem dados de acesso')
+
+    # D.1.b - Horários das Sessões
+    df_sessoes_start = user_logs[user_logs['is_new_session']].copy()
+    if not df_sessoes_start.empty:
+        df_sessoes_start['hora'] = pd.to_datetime(df_sessoes_start['timecreated_dt'], errors='coerce').dt.hour
+        horarios = df_sessoes_start.groupby('hora').size().reset_index(name='Sessões')
+        fig_horarios = px.bar(
+            horarios, x='hora', y='Sessões', 
+            title='Horários Mais Utilizados (Sessões)',
+            labels={'hora': 'Hora do Dia', 'Sessões': 'Quantidade de Sessões'},
+            color_discrete_sequence=['#30a14e']
+        )
+        fig_horarios.update_layout(
+            xaxis=dict(tickmode='linear', tick0=0, dtick=1, range=[-0.5, 23.5]),
+            plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
+            margin=dict(l=20, r=20, t=40, b=20)
+        )
+    else:
+        fig_horarios = px.bar(title='Sem dados de horários')
 
     # D.2 - Tempo Gasto por Material Complementar
     materiais = user_logs[(user_logs['component'].isin(['mod_resource', 'mod_folder', 'mod_page', 'mod_url', 'mod_book', 'mod_label'])) & (user_logs['action'] == 'viewed')].copy() if not user_logs.empty else pd.DataFrame()
@@ -396,6 +419,9 @@ def atualizar_conteudo_aluno(user_id_int):
             ]),
             html.Div(className='graphs-grid-2col', children=[
                 html.Div(className='graph-container', children=[dcc.Graph(figure=fig_acessos)]),
+                html.Div(className='graph-container', children=[dcc.Graph(figure=fig_horarios)])
+            ]),
+            html.Div(className='graphs-grid-1col', children=[
                 html.Div(className='graph-container', children=[dcc.Graph(figure=fig_materiais)])
             ])
         ]),

@@ -4,6 +4,8 @@ from dash import Dash, html, dcc
 # Iniciando o app com suporte a páginas (use_pages=True)
 app = Dash(__name__, use_pages=True)
 
+server = app.server 
+
 app.layout = html.Div([
     
     # Cabeçalho / Menu de Navegação estilizado como Abas
